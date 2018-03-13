@@ -34,12 +34,18 @@
 		<db.hsqldb.startNstop.skip>false</db.hsqldb.startNstop.skip>
 
 		<!-- lib and plugins versions -->
+		<org.bspv.bspv-commons.version>0.0.1-SNAPSHOT</org.bspv.bspv-commons.version>
 		<testng.version>6.13.1</testng.version>
 		<hsqldb.version>2.3.5</hsqldb.version>
 		<org.flywaydb.flyway-maven-plugin.version>4.1.2</org.flywaydb.flyway-maven-plugin.version>
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.bspv</groupId>
+			<artifactId>bspv-commons</artifactId>
+			<version>${org.bspv.bspv-commons.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
