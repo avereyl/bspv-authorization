@@ -212,6 +212,18 @@ public final class User implements Serializable, UserDetails, CredentialsContain
         this.authorities.addAll(builder.authorities);
     }
 
+    public Builder toBuilder() {
+        Builder builder = User.builder();
+        builder.id = this.id;
+        builder.version = this.version;
+        builder.username = this.username;
+        builder.password = this.password;
+        builder.enabled = this.enabled;
+        builder.email = this.email;
+        builder.authorities.addAll(this.authorities);
+        return builder;
+    }
+    
     /*
      * (non-Javadoc)
      * @see org.springframework.security.core.CredentialsContainer#eraseCredentials()

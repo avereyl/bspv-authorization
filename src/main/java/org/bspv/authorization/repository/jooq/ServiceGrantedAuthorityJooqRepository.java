@@ -118,5 +118,19 @@ public class ServiceGrantedAuthorityJooqRepository implements ServiceGrantedAuth
         .and(AUTHORITIES.AUTHORITY.in(authorities))
         .execute();
     }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.bspv.authorization.repository.ServiceGrantedAuthorityRepository#revokeAuthority(org.bspv.authorization.model.User, org.bspv.authorization.model.ServiceGrantedAuthority)
+     */
+    @Override
+    public void revokeAuthority(User user, ServiceGrantedAuthority authority) {
+        this.dslContext
+        .deleteFrom(AUTHORITIES)
+        .where(AUTHORITIES.USER_ID.eq(user.getId()))
+        .and(AUTHORITIES.SERVICE.eq(authority.getService()))
+        .and(AUTHORITIES.AUTHORITY.eq(authority.getAuthority()))
+        .execute();
+    }
 
 }

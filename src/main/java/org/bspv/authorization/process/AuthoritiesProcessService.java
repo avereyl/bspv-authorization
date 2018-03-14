@@ -8,8 +8,10 @@ import org.bspv.authorization.model.ServiceGrantedAuthority;
 import org.bspv.authorization.model.User;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class AuthoritiesProcessService {
 
 
@@ -57,6 +59,17 @@ public class AuthoritiesProcessService {
     public void replaceAuthorities(Set<ServiceGrantedAuthority> authorities, User user) {
         // TODO Auto-generated method stub
         
+    }
+
+    /**
+     * 
+     * @param user
+     * @param authority
+     * @return
+     */
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public void revokeAuthority(User user, ServiceGrantedAuthority authority) {
+        // TODO Auto-generated method stub
     }
 
 
