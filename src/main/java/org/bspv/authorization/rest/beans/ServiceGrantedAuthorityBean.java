@@ -1,4 +1,4 @@
-package org.bspv.authorization.rest.controller.beans;
+package org.bspv.authorization.rest.beans;
 
 import javax.validation.constraints.NotNull;
 
