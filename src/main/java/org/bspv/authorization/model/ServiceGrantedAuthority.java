@@ -49,6 +49,11 @@ public final class ServiceGrantedAuthority implements GrantedAuthority {
     @Getter
     private final GrantedAuthority grantedAuthority;
     
+    public ServiceGrantedAuthority(String service, GrantedAuthority grantedAuthority) {
+        super();
+        this.service = service;
+        this.grantedAuthority = grantedAuthority;
+    }
     /**
      * Constructor. Builder pattern.
      * 
@@ -76,7 +81,8 @@ public final class ServiceGrantedAuthority implements GrantedAuthority {
     public String getAuthority() {
         return grantedAuthority.getAuthority();
     }
-    
+
+
     
 
 }
