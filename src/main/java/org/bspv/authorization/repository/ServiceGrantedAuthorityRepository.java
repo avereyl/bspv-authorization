@@ -51,5 +51,11 @@ public interface ServiceGrantedAuthorityRepository {
      * @param authorities The set of authorities to revoke
      */
     void revokeAuthorities(User user, String service, Set<String> authorities);
+    /**
+     * Revoke the authority of the user.
+     * @param user The user
+     * @param authority The authority to revoke
+     */
+    void revokeAuthority(User user, ServiceGrantedAuthority authority);
     
 }

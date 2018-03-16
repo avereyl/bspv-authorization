@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.bspv.authorization.model.ServiceGrantedAuthority;
 import org.bspv.authorization.model.User;
+import org.bspv.authorization.model.User.Builder;
 import org.bspv.authorization.process.AuthoritiesProcessService;
 import org.bspv.authorization.process.UserProcessService;
 import org.bspv.authorization.process.wrapper.UserSearchWrapper;
@@ -42,9 +43,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RestController("/")
 @RequestMapping(produces = "application/json")
 public class UserController {
-    
+
     @Autowired
     private UserProcessService userProcessService;
+    
     @Autowired
     private AuthoritiesProcessService authoritiesProcessService;
 
@@ -54,7 +56,7 @@ public class UserController {
     public ResponseEntity<String> hello() {
         return new ResponseEntity<>(HttpStatus.OK);
     }
-    
+
     /**
      * Return a list of a page of users according search parameters.
      * <ul>
@@ -65,11 +67,13 @@ public class UserController {
      * <li>GET /users/?ids=4a336911-a45a-4130-9ecd-f18592740c45,cd175357-aa26-464b-8ca0-a4e4588c2c9f
      * </ul>
      * 
+     * @param range
+     * @param queryMap
+     * @param principal
      * @return Page of users.
      */
     @GetMapping(value = "users/")
-    public ResponseEntity<Iterable<User>> findUsers(
-            @RequestParam(value = "range", required = false) String range,
+    public ResponseEntity<Iterable<User>> findUsers(@RequestParam(value = "range", required = false) String range,
             @RequestParam MultiValueMap<String, String> queryMap,
             @AuthenticationPrincipal(errorOnInvalidType = true) User principal) {
         UserSearchWrapper userSearchWrapper = new UserSearchWrapper(queryMap);
@@ -81,9 +85,9 @@ public class UserController {
             Page<User> page = this.userProcessService.findUsers(userSearchWrapper, pageRequest);
             return ResponseEntity.ok(page);
         }
-        
+
     }
-    
+
     /**
      * Return the user with the given uuid.
      * 
@@ -101,41 +105,42 @@ public class UserController {
     /**
      * Return the list of user authorities for the given user uuid.
      * 
-     * @param uuid
-     *            id of the targeted user
-     * @return The list of authorities
+     * @param uuid id of the targeted user
+     * @param service
+     * @param authority
+     * @param principal
+     * @return
      */
     @GetMapping("users/{uuid}/authorities/")
-    public ResponseEntity<List<ServiceGrantedAuthority>> findUserAuthorities(
-            @PathVariable(value = "uuid") UUID uuid,
-            @RequestParam(value="service", required = false) String service,
-            @RequestParam(value="authority", required = false) String authority,
-            @AuthenticationPrincipal User principal
-            ) {
+    public ResponseEntity<List<ServiceGrantedAuthority>> findUserAuthorities(@PathVariable(value = "uuid") UUID uuid,
+            @RequestParam(value = "service", required = false) String service,
+            @RequestParam(value = "authority", required = false) String authority,
+            @AuthenticationPrincipal User principal) {
         List<ServiceGrantedAuthority> authorities = this.authoritiesProcessService.findUserAuthorities(uuid);
-        authorities = authorities
-            .stream()
-            .filter(a -> StringUtils.isEmpty(service) || service.equals(a.getService()))
-            .filter(a -> StringUtils.isEmpty(authority) || authority.equals(a.getAuthority()))
-            .collect(Collectors.toList());
+        authorities = authorities.stream().filter(a -> StringUtils.isEmpty(service) || service.equals(a.getService()))
+                .filter(a -> StringUtils.isEmpty(authority) || authority.equals(a.getAuthority()))
+                .collect(Collectors.toList());
         return ResponseEntity.ok(authorities);
     }
 
     /**
-     * Grant the given authority to the user.
-     * (Duplicate authority is ignored)
+     * Grant the given authority to the user. (Duplicate authority is ignored)
+     * @param uuid
+     * @param authorityBean
+     * @param principal
+     * @return
      */
     @PostMapping("users/{uuid}/authorities/")
-    public ResponseEntity<ServiceGrantedAuthority> grantAuthority(
-            @PathVariable(value = "uuid") UUID uuid,
+    public ResponseEntity<ServiceGrantedAuthority> grantAuthority(@PathVariable(value = "uuid") UUID uuid,
             @RequestBody @Validated ServiceGrantedAuthorityBean authorityBean,
             @AuthenticationPrincipal User principal) {
-        
+
         User user = userProcessService.findUser(uuid);
         if (user == null) {
             return ResponseEntity.notFound().build();
         }
-        ServiceGrantedAuthority authority = ServiceGrantedAuthority.builder().service(authorityBean.getService()).grantedAuthority(new SimpleGrantedAuthority(authorityBean.getAuthority())).build();
+        ServiceGrantedAuthority authority = ServiceGrantedAuthority.builder().service(authorityBean.getService())
+                .grantedAuthority(new SimpleGrantedAuthority(authorityBean.getAuthority())).build();
         if (!user.getAuthorities().contains(authority)) {
             authoritiesProcessService.grantAuthority(authority, user);
         }
@@ -143,46 +148,55 @@ public class UserController {
                 .buildAndExpand("", "").toUri();
         return ResponseEntity.created(location).build();
     }
+
     /**
-     *
+     * 
+     * @param uuid
+     * @param authorityBeans
+     * @param principal
+     * @return
      */
     @PutMapping("users/{uuid}/authorities/")
-    public ResponseEntity<List<ServiceGrantedAuthority>> grantAuthorities(
-            @PathVariable(value = "uuid") UUID uuid,
+    public ResponseEntity<List<ServiceGrantedAuthority>> grantAuthorities(@PathVariable(value = "uuid") UUID uuid,
             @RequestBody @Validated List<ServiceGrantedAuthorityBean> authorityBeans,
             @AuthenticationPrincipal User principal) {
-        
+
         User user = userProcessService.findUser(uuid);
         if (user == null) {
             return ResponseEntity.notFound().build();
         }
-        Set<ServiceGrantedAuthority> authorities = 
-        authorityBeans
-            .stream()
-            .map(b -> ServiceGrantedAuthority
-                            .builder()
-                            .service(b.getService())
-                            .grantedAuthority(new SimpleGrantedAuthority(b.getAuthority()))
-                            .build())
-            .collect(Collectors.toSet());
+        Set<ServiceGrantedAuthority> authorities = authorityBeans.stream()
+                .map(b -> ServiceGrantedAuthority.builder().service(b.getService())
+                        .grantedAuthority(new SimpleGrantedAuthority(b.getAuthority())).build())
+                .collect(Collectors.toSet());
         authoritiesProcessService.replaceAuthorities(authorities, user);
         return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().build().toUri()).build();
     }
-    
+
     /**
-     *
+     * 
+     * @param uuid
+     * @param service
+     * @param authority
+     * @param principal
+     * @return
      */
     @DeleteMapping("users/{uuid}/authorities/")
-    public ResponseEntity<List<ServiceGrantedAuthority>> revokeAuthorities(
-            @PathVariable(value = "uuid") UUID uuid,
-            @RequestParam(value="service", required = false) String service,
-            @RequestParam(value="authority", required = false) String authority,
+    public ResponseEntity<List<ServiceGrantedAuthority>> revokeAuthorities(@PathVariable(value = "uuid") UUID uuid,
+            @RequestParam(value = "service", required = false) String service,
+            @RequestParam(value = "authority", required = false) String authority,
             @AuthenticationPrincipal User principal) {
-      //TODO
-        
+        User user = userProcessService.findUser(uuid);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        authoritiesProcessService.findUserAuthorities(uuid).stream()
+                .filter(a -> StringUtils.isEmpty(service) || service.equals(a.getService()))
+                .filter(a -> StringUtils.isEmpty(authority) || authority.equals(a.getAuthority()))
+                .forEach(a -> authoritiesProcessService.revokeAuthority(user, a));
         return ResponseEntity.noContent().build();
     }
-    
+
     /**
      * Save the full user. No content sent back.
      * 
@@ -193,7 +207,7 @@ public class UserController {
      */
     @PostMapping("users/")
     public ResponseEntity<User> createUser(
-            @RequestBody @Validated({UserBean.CreationValidation.class}) UserBean userBean,
+            @RequestBody @Validated({ UserBean.CreationValidation.class }) UserBean userBean,
             @AuthenticationPrincipal User principal) {
 //      @formatter:off
         Set<ServiceGrantedAuthorityBean> authoritiesBeans = userBean.getAuthorithies() == null ? Collections.emptySet() : userBean.getAuthorithies();
@@ -218,28 +232,30 @@ public class UserController {
 //      @formatter:on
         // save the user with password and authorities
         User savedUser = userProcessService.saveUser(user);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
-                .buildAndExpand(user.getId()).toUri();
-        return ResponseEntity.created(location).eTag("\""+ savedUser.getVersion() +"\"").build();
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(user.getId())
+                .toUri();
+        return ResponseEntity.created(location).eTag("\"" + savedUser.getVersion() + "\"").build();
     }
-    
+
     /**
      * Save the full user. No content sent back.
      * 
-     * @param user
-     *            The user to save.
+     * @param uuid
+     *            The uuid of the user to save.
+     * @param headers
+     *            Http headers
+     * @param userBean
      * @param principal
      *            The principal responsible for the request.
      */
     @PutMapping("users/{uuid}")
-    public ResponseEntity<User> fullySaveUser(
-            @PathVariable(value = "uuid") UUID uuid,
+    public ResponseEntity<User> fullySaveUser(@PathVariable(value = "uuid") UUID uuid,
             @RequestHeader HttpHeaders headers,
-            @RequestBody @Validated({UserBean.UpdateValidation.class}) UserBean userBean,
+            @RequestBody @Validated({ UserBean.UpdateValidation.class }) UserBean userBean,
             @AuthenticationPrincipal User principal) {
-        
+
         Long version = headers.getIfMatch().isEmpty() ? 0L : Long.valueOf(headers.getIfMatch().get(0));
-        
+
 //      @formatter:off
         Set<ServiceGrantedAuthorityBean> authoritiesBeans = userBean.getAuthorithies() == null ? Collections.emptySet() : userBean.getAuthorithies();
         Set<ServiceGrantedAuthority> authorities = authoritiesBeans
@@ -271,20 +287,46 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-
+    /**
+     * 
+     * @param uuid
+     * @param headers
+     * @param userBean
+     * @param principal
+     * @return
+     */
     @PatchMapping("users/{uuid}")
-    public ResponseEntity<User> partiallySaveUser( 
-            @PathVariable(value = "uuid") UUID uuid,
-            @RequestHeader HttpHeaders headers,
-            @RequestBody @Validated UserBean userBean,
+    public ResponseEntity<User> partiallySaveUser(@PathVariable(value = "uuid") UUID uuid,
+            @RequestHeader HttpHeaders headers, @RequestBody @Validated UserBean userBean,
             @AuthenticationPrincipal User principal) {
         if (headers.getIfMatch().isEmpty()) {
             return ResponseEntity.status(HttpStatus.PRECONDITION_REQUIRED).build();
         }
         Long version = Long.valueOf(headers.getIfMatch().get(0));
-        
-        User patchedUser = null;
-        //TODO
+        User user = userProcessService.findUser(uuid);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        } else if (!user.getVersion().equals(version)) {
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).build();
+        }
+        // merging user bean into user
+        Builder builder = user.toBuilder()
+                .username(userBean.getUsername() == null ? user.getUsername() : userBean.getUsername())
+                .password(userBean.getPassword() == null ? user.getPassword() : userBean.getPassword())
+                .email(userBean.getEmail() == null ? user.getEmail() : userBean.getEmail())
+                .enable(userBean.getEnabled() == null ? user.isEnabled() : userBean.getEnabled());
+        if (userBean.getAuthorithies() != null) {
+            Set<ServiceGrantedAuthority> authorities = userBean.getAuthorithies().stream()
+                    .map(u -> ServiceGrantedAuthority
+                            .builder()
+                            .service(u.getService())
+                            .grantedAuthority(new SimpleGrantedAuthority(u.getAuthority()))
+                            .build())
+                    .collect(Collectors.toSet());
+            builder.authorities(authorities);
+        }
+        //saving user
+        User patchedUser = userProcessService.saveUser(builder.build());
         return ResponseEntity.ok().eTag("\"" + patchedUser.getVersion() + "\"").build();
     }
 }
