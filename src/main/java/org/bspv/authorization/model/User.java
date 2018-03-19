@@ -23,7 +23,7 @@ import lombok.ToString;
  */
 @ToString
 @EqualsAndHashCode(of = { "username" })
-public final class User implements Serializable, UserDetails, CredentialsContainer {
+public final class User implements Serializable, UserDetails, CredentialsContainer, Cloneable {
 
     /**
      * Generated serial version UID.
@@ -277,4 +277,11 @@ public final class User implements Serializable, UserDetails, CredentialsContain
     public boolean isCredentialsNonExpired() {
         return true;
     }
+
+    @Override
+    public User clone() throws CloneNotSupportedException {
+        return this.toBuilder().build();
+    }
+    
+    
 }
