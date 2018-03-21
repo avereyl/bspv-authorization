@@ -49,7 +49,7 @@ public class UserController {
     
     @Autowired
     private AuthoritiesProcessService authoritiesProcessService;
-
+    
     /**
      */
     @GetMapping("")

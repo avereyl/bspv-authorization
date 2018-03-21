@@ -5,9 +5,12 @@ import org.bspv.security.annotation.EnableJwtServer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.SecurityFilterAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -15,12 +18,11 @@ import org.springframework.web.context.WebApplicationContext;
  * FlywayAutoConfiguration is disabled. Flyway is only used with Maven profile
  * 'generate' and linked to Jooq class generation.
  */
-// @ServletComponentScan
-
 @EnableJwtFilter
 @EnableJwtServer
+@EnableWebSecurity
 @ServletComponentScan
-@SpringBootApplication(exclude = { FlywayAutoConfiguration.class })
+@SpringBootApplication(exclude = { FlywayAutoConfiguration.class, SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class })
 public class BspvAuthorizationApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
