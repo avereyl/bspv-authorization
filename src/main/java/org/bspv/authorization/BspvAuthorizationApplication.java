@@ -6,7 +6,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.SecurityFilterAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
@@ -22,7 +21,7 @@ import org.springframework.web.context.WebApplicationContext;
 @EnableJwtServer
 @EnableWebSecurity
 @ServletComponentScan
-@SpringBootApplication(exclude = { FlywayAutoConfiguration.class, SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class })
+@SpringBootApplication(exclude = { FlywayAutoConfiguration.class, SecurityAutoConfiguration.class})
 public class BspvAuthorizationApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) {

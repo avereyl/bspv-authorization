@@ -1,6 +1,9 @@
 package org.bspv.authorization.config.security;
 
 public class ServiceAuthoritiesWrapper {
+    
+    public static final String SERVICE_NAME = "service";
+    public static final String AUTHORITIES_NAME = "authorities";
 
     private final String service;
     private final String[] authorities;

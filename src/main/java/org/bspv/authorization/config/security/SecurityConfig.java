@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
@@ -20,9 +19,14 @@ public class SecurityConfig {
     @Value("${bspv.security.fallback.password:admin}")
     private String fallbackAdminPassword;
     
-    
+    /**
+     * Default fallback admin user.
+     * Please define also a compliant {@link TokenToUserDetailsMapper}.
+     * 
+     * @return
+     */
     @Bean
-    public UserDetails fallbackAdmin() {
+    public User fallbackAdmin() {
         return User.builder()
                 .enable(true)
                 .username(fallbackAdminUsername)
@@ -31,6 +35,10 @@ public class SecurityConfig {
                 .build();
     }
 
+    /**
+     * 
+     * @return
+     */
     @Bean
     public TokenToUserDetailsMapper<User> token2UserMapper() {
         return new TokenToUserMapper();

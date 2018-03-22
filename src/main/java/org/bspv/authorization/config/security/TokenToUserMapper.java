@@ -31,12 +31,12 @@ public class TokenToUserMapper implements TokenToUserDetailsMapper<User> {
     @Override
     public User toUserDetails(Claims claims) {
         @SuppressWarnings("unchecked")
-        List<ServiceAuthoritiesWrapper> scopes = claims.get(AUTHORITIES_CLAIM_NAME, List.class);
+        List<Map<String, Object>> scopes = claims.get(AUTHORITIES_CLAIM_NAME, List.class);
         List<ServiceGrantedAuthority> authorities = scopes
                 .stream()
-                .flatMap(wrapper -> Arrays.asList(wrapper.getAuthorities())
+                .flatMap(scope -> Arrays.asList(scope.get(ServiceAuthoritiesWrapper.AUTHORITIES_NAME))
                         .stream()
-                        .map(auth -> new ServiceGrantedAuthority(wrapper.getService(), new SimpleGrantedAuthority(auth)))
+                        .map(auth -> new ServiceGrantedAuthority(scope.get(ServiceAuthoritiesWrapper.SERVICE_NAME).toString(), new SimpleGrantedAuthority(auth.toString())))
                         ).collect(Collectors.toList());
         return User.builder().id(UUID.fromString(claims.get(USER_ID_CLAIM_NAME, String.class)))
                 .username(claims.getSubject()).email(claims.get(EMAIL_CLAIM_NAME, String.class))
