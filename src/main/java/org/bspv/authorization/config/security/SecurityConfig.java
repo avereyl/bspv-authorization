@@ -8,7 +8,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.keygen.KeyGenerators;
+import org.springframework.util.StringUtils;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Configuration
 public class SecurityConfig {
     
@@ -16,7 +21,7 @@ public class SecurityConfig {
     private String serviceName;
     @Value("${bspv.security.fallback.username:admin}")
     private String fallbackAdminUsername;
-    @Value("${bspv.security.fallback.password:admin}")
+    @Value("${bspv.security.fallback.password}")
     private String fallbackAdminPassword;
     
     /**
@@ -27,10 +32,15 @@ public class SecurityConfig {
      */
     @Bean
     public User fallbackAdmin() {
+        String password = fallbackAdminPassword;
+        if (StringUtils.isEmpty(fallbackAdminPassword)) {
+            password = KeyGenerators.string().generateKey();
+            log.warn("Fallback admin password not set, using {}.", password);
+        }
         return User.builder()
                 .enable(true)
                 .username(fallbackAdminUsername)
-                .password(new BCryptPasswordEncoder(11).encode(fallbackAdminPassword))
+                .password(new BCryptPasswordEncoder(11).encode(password))
                 .authority(new ServiceGrantedAuthority(serviceName, new SimpleGrantedAuthority("ADMIN")))
                 .build();
     }
