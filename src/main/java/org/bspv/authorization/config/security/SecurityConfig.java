@@ -6,6 +6,7 @@ import org.bspv.security.jwt.mapper.TokenToUserDetailsMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.keygen.KeyGenerators;
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Configuration
 public class SecurityConfig {
+    
     
     @Value("${bspv.security.service.name}")
     private String serviceName;
@@ -47,10 +49,21 @@ public class SecurityConfig {
 
     /**
      * 
-     * @return
+     * @return 
      */
     @Bean
     public TokenToUserDetailsMapper<User> token2UserMapper() {
         return new TokenToUserMapper();
+    }
+    
+    /**
+     * Adding a custom {@link MethodSecurityExpressionHandler} to enhance security expressions.
+     * @return a new {@link CustomMethodSecurityExpressionHandler}
+     */
+    @Bean
+    protected CustomMethodSecurityExpressionHandler createExpressionHandler() {
+        CustomMethodSecurityExpressionHandler expressionHandler = new CustomMethodSecurityExpressionHandler(serviceName);
+        expressionHandler.setPermissionEvaluator(expressionHandler.getPermissionEvaluator());
+        return expressionHandler;
     }
 }

@@ -18,4 +18,8 @@ public class UserDetailsBusinessService implements UserDetailsService {
         return userDetailsRepository.loadByUsername(username);
     }
 
+    public void disableUser(String username) {
+        userDetailsRepository.disableUser(username);
+    }
+
 }

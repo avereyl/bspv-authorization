@@ -329,4 +329,5 @@ public class UserController {
         User patchedUser = userProcessService.saveUser(builder.build());
         return ResponseEntity.ok().eTag("\"" + patchedUser.getVersion() + "\"").build();
     }
+    
 }

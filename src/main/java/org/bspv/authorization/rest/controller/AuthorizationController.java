@@ -6,5 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController("/auth")
 @RequestMapping(produces = "application/json")
 public class AuthorizationController {
+    
+    
 
 }
