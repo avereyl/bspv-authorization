@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.bspv.authorization.model.User;
+import org.bspv.authorization.model.wrapper.UserSearchWrapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -17,7 +18,8 @@ public interface UserRepository {
 
     /**
      * Insert a new user, raises an exception if a user with same identifier already
-     * exists. This method IGNORE users authorities please @see {@link ServiceGrantedAuthorityRepository}.
+     * exists. This method IGNORE users authorities please @see
+     * {@link ServiceGrantedAuthorityRepository}.
      * 
      * @param user
      *            The user to be inserted
@@ -27,8 +29,8 @@ public interface UserRepository {
 
     /**
      * Insert a new user, if a user with same identifier already exists then
-     * increment its version.
-     * This method IGNORE users authorities please @see {@link ServiceGrantedAuthorityRepository}.
+     * increment its version. This method IGNORE users authorities please @see
+     * {@link ServiceGrantedAuthorityRepository}.
      * 
      * @param user
      *            The user to be inserted
@@ -38,16 +40,18 @@ public interface UserRepository {
 
     /**
      * Update user's values, NOR its authorities neither his password !
+     * 
      * @see {@link ServiceGrantedAuthorityRepository}.
-     *  
+     * 
      * @param user
      * @return the updated user
      */
     User update(User user);
 
     /**
-     * Find all (active) users according given pagination request.
-     * Users are loaded with their authorities but without his password.
+     * Find all (active) users according given pagination request. Users are loaded
+     * with their authorities but without his password.
+     * 
      * @param pageable
      *            Pagination request
      * @return A {@link Page} of users.
@@ -57,6 +61,7 @@ public interface UserRepository {
     /**
      * Find all (enabled and disabled) users according given pagination request.
      * Users are loaded with their authorities but without his password.
+     * 
      * @param pageable
      *            Pagination request
      * @return A {@link Page} of users.
@@ -64,8 +69,9 @@ public interface UserRepository {
     Page<User> findAnyUsers(Pageable pageable);
 
     /**
-     * Find the user (enabled) with the given id.
-     * User is loaded with their authorities but without his password.
+     * Find the user (enabled) with the given id. User is loaded with their
+     * authorities but without his password.
+     * 
      * @param uuid
      *            id of the user
      * @return The user
@@ -73,30 +79,56 @@ public interface UserRepository {
     User findUserById(UUID uuid);
 
     /**
-     * Find the user (enabled and disabled) with the given id.
-     * User is loaded with their authorities but without his password.
+     * Find the user (enabled and disabled) with the given id. User is loaded with
+     * their authorities but without his password.
+     * 
      * @param uuid
      *            id of the user
      * @return The user
      */
     User findAnyUserById(UUID uuid);
-    
+
     /**
-     * Find the users (enabled) with the given ids.
-     * Users are loaded with their authorities but without his password.
+     * Find the users (enabled) with the given ids. Users are loaded with their
+     * authorities but without his password.
+     * 
      * @param uuids
      *            ids of the users
      * @return The users set
      */
     Set<User> findUsersByIds(Set<UUID> uuids);
-    
+
     /**
-     * Find the users (enabled and disabled) with the given ids.
-     * Users are loaded with their authorities but without his password.
+     * Find the users (enabled and disabled) with the given ids. Users are loaded
+     * with their authorities but without their password.
+     * 
      * @param uuids
      *            ids of the users
      * @return The users set
      */
     Set<User> findAnyUsersByIds(Set<UUID> uuids);
+
+    /**
+     * Find the users (enabled and disabled) complying with the search wrapper.
+     * Users are loaded with their authorities but without theirs password.
+     * 
+     * @param searchWrapper
+     *            wrapper containing search criterion
+     * @return The users set
+     */
+    Set<User> findAnyUsers(UserSearchWrapper searchWrapper);
+
+    /**
+     * Find the users (enabled and disabled) complying with the search wrapper and
+     * the page request. Users are loaded with their authorities but without theirs
+     * password.
+     * 
+     * @param searchWrapper
+     *            wrapper containing search criterion
+     * @param pageable
+     *            Pagination request
+     * @return The users set
+     */
+    Page<User> findAnyUsers(UserSearchWrapper searchWrapper, Pageable pageable);
 
 }

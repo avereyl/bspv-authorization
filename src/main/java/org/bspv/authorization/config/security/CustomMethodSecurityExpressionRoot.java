@@ -29,7 +29,8 @@ public class CustomMethodSecurityExpressionRoot extends SecurityExpressionRoot
         return ((User) this.getPrincipal())
                 .getAuthorities()
                 .stream()
-                .anyMatch( a -> this.serviceName.equals(a.getService()) && "ADMIN".equals(a.getGrantedAuthority().getAuthority()));
+                .anyMatch( a -> this.serviceName.equals(a.getService()) 
+                        && "ADMIN".equalsIgnoreCase(a.getAuthority()));
     }
     
     public boolean isMyself(UUID uuid) {

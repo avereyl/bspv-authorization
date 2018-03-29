@@ -20,12 +20,14 @@ import org.bspv.authorization.jooq.tables.records.AuthoritiesRecord;
 import org.bspv.authorization.jooq.tables.records.UsersRecord;
 import org.bspv.authorization.model.ServiceGrantedAuthority;
 import org.bspv.authorization.model.User;
+import org.bspv.authorization.model.wrapper.UserSearchWrapper;
 import org.bspv.authorization.repository.UserRepository;
 import org.bspv.authorization.repository.jooq.converter.RecordConverterFactory;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
+import org.jooq.impl.DSL;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
@@ -195,7 +197,9 @@ public class UserJooqRepository implements UserRepository {
                 .map(r -> {
                     Set<ServiceGrantedAuthority> authorities = new HashSet<>();
                     authorities.addAll(UserJooqRepository.buildAuthorithies(authorithiesMap.get(r.get(USERS.ID))));
-                    return RecordConverterFactory.toBuilder(r).authorities(authorities).build().clearCredentials();
+                    return RecordConverterFactory.toBuilder(r).authorities(authorities)
+                            .build()
+                            .clearCredentials();
                 })
                 .collect(Collectors.toList()));
         
@@ -225,7 +229,9 @@ public class UserJooqRepository implements UserRepository {
         Entry<UsersRecord, Result<Record>> entry = recordResultMap.entrySet().iterator().next();
         UsersRecord userRecord = entry.getKey();
         Set<ServiceGrantedAuthority> authorities = UserJooqRepository.buildAuthorithies(entry.getValue());
-        return RecordConverterFactory.toBuilder(userRecord).authorities(authorities).build().clearCredentials();
+        return RecordConverterFactory.toBuilder(userRecord).authorities(authorities)
+                .build()
+                .clearCredentials();
     }
 
     /* (non-Javadoc)
@@ -249,7 +255,9 @@ public class UserJooqRepository implements UserRepository {
         Entry<UsersRecord, Result<Record>> entry = recordResultMap.entrySet().iterator().next();
         UsersRecord userRecord = entry.getKey();
         Set<ServiceGrantedAuthority> authorities = UserJooqRepository.buildAuthorithies(entry.getValue());
-        return RecordConverterFactory.toBuilder(userRecord).authorities(authorities).build().clearCredentials();
+        return RecordConverterFactory.toBuilder(userRecord).authorities(authorities)
+                .build()
+                .clearCredentials();
     }
 
     /* (non-Javadoc)
@@ -270,7 +278,9 @@ public class UserJooqRepository implements UserRepository {
                 .intoGroups(USERS);
         recordResultMap.entrySet().forEach(entry -> {
             users.add(RecordConverterFactory.toBuilder(entry.getKey())
-                    .authorities(UserJooqRepository.buildAuthorithies(entry.getValue())).build());
+                    .authorities(UserJooqRepository.buildAuthorithies(entry.getValue()))
+                    .build()
+                    .clearCredentials());
         });
         return users;
     }
@@ -291,10 +301,65 @@ public class UserJooqRepository implements UserRepository {
                 .intoGroups(USERS);
         recordResultMap.entrySet().forEach(entry -> {
             users.add(RecordConverterFactory.toBuilder(entry.getKey())
-                    .authorities(UserJooqRepository.buildAuthorithies(entry.getValue())).build());
+                    .authorities(UserJooqRepository.buildAuthorithies(entry.getValue()))
+                    .build()
+                    .clearCredentials());
         });
         return users;
     }
+
+    /*
+     * (non-Javadoc)
+     * @see org.bspv.authorization.repository.UserRepository#findAnyUsers(org.bspv.authorization.model.wrapper.UserSearchWrapper)
+     */
+    @Override
+    public Set<User> findAnyUsers(UserSearchWrapper searchWrapper) {
+        Set<User> users = new HashSet<>();
+        //building condition
+        Condition condition = buildCondition(searchWrapper);
+        Map<UsersRecord, Result<Record>> recordResultMap = 
+                this.dslContext
+                .select()
+                .from(USERS)
+                .leftJoin(AUTHORITIES)
+                .on(AUTHORITIES.USER_ID.eq(USERS.ID))
+                .where(condition)
+                .fetch()
+                .intoGroups(USERS);
+        recordResultMap.entrySet().forEach(entry -> {
+            users.add(RecordConverterFactory.toBuilder(entry.getKey())
+                    .authorities(UserJooqRepository.buildAuthorithies(entry.getValue()))
+                    .build()
+                    .clearCredentials());
+        });
+        return users;
+    }
+
+    @Override
+    public Page<User> findAnyUsers(UserSearchWrapper searchWrapper, Pageable pageable) {
+        List<User> users = new ArrayList<User>();
+        //building condition
+        Condition condition = buildCondition(searchWrapper);
+        Map<UsersRecord, Result<Record>> recordResultMap = 
+                this.dslContext
+                .select()
+                .from(USERS)
+                .leftJoin(AUTHORITIES)
+                .on(AUTHORITIES.USER_ID.eq(USERS.ID))
+                .where(condition)
+                .fetch()
+                .intoGroups(USERS);
+        recordResultMap.entrySet().forEach(entry -> {
+            users.add(RecordConverterFactory.toBuilder(entry.getKey())
+                    .authorities(UserJooqRepository.buildAuthorithies(entry.getValue()))
+                    .build()
+                    .clearCredentials());
+        });
+        int nbTotalElements = this.dslContext.fetchCount(USERS, condition);
+        return new PageImpl<>(users, pageable, nbTotalElements);
+    }
+
+
 
     public static Set<ServiceGrantedAuthority> buildAuthorithies(Result<? extends Record> result) {
         return result.stream()
@@ -306,4 +371,14 @@ public class UserJooqRepository implements UserRepository {
         })
         .collect(Collectors.toSet());
     }
+    
+    private Condition buildCondition(UserSearchWrapper searchWrapper) {
+        Condition condition = DSL.trueCondition();
+        USERS.ENABLED.eq(Boolean.TRUE);
+        searchWrapper.getEnabled().ifPresent(b -> condition.and(USERS.ENABLED.eq(b)));
+        searchWrapper.getUsername().ifPresent(s -> condition.and(USERS.USERNAME.eq(s)));
+        searchWrapper.getIds().ifPresent(l -> condition.and(USERS.ID.in(l)));
+        return condition;
+    }
+    
 }

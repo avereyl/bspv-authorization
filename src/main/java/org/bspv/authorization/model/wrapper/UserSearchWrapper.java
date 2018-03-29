@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.util.MultiValueMap;
 
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.ToString;
 
 /**
@@ -82,8 +83,11 @@ public class UserSearchWrapper {
         abstract void handle(UserSearchWrapper wrapper, List<String> value);
     }
 
+    @Getter
     private Optional<Boolean> enabled = Optional.empty();
+    @Getter
     private Optional<String> username = Optional.empty();
+    @Getter
     private Optional<List<String>> ids = Optional.empty();
 
     /**

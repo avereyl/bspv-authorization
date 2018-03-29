@@ -83,6 +83,19 @@ public class ServiceGrantedAuthorityJooqRepository implements ServiceGrantedAuth
         insertStep.onDuplicateKeyIgnore().execute();
     }
 
+    /* (non-Javadoc)
+     * @see org.bspv.authorization.repository.ServiceGrantedAuthorityRepository#grantAuthorithies(org.bspv.authorization.model.User, java.util.Set)
+     */
+    @Override
+    public void grantAuthorithies(User user, Set<ServiceGrantedAuthority> authorities) {
+        InsertValuesStep3<AuthoritiesRecord, UUID, String, String > insertStep = this.dslContext
+                .insertInto(AUTHORITIES)
+                .columns(AUTHORITIES.USER_ID, AUTHORITIES.SERVICE, AUTHORITIES.AUTHORITY);
+        for (ServiceGrantedAuthority authority : authorities) {
+            insertStep.values(user.getId(), authority.getService(), authority.getAuthority());
+        }
+        insertStep.onDuplicateKeyIgnore().execute();
+    }
     /*
      * (non-Javadoc)
      * @see org.bspv.authorization.repository.ServiceGrantedAuthorityRepository#revokeAllAuthorities(org.bspv.authorization.model.User)

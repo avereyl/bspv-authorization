@@ -25,7 +25,7 @@ public interface UserDetailsRepository {
      * @param username Name of the user
      * @param newPassword new password
      */
-    void changePassword(String username, String newPasword);
+    void changePassword(String username, String newPassword);
     
     /**
      * Enable the user.

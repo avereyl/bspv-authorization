@@ -34,6 +34,12 @@ public interface ServiceGrantedAuthorityRepository {
      */
     void grantAuthorithies(User user, String service, Set<String> authorities);
     /**
+     * Grant the given authorities to the user for the service.
+     * @param user The user
+     * @param authorities The set of {@link ServiceGrantedAuthority} to grant (SHOULD NOT BE EMPTY)
+     */
+    void grantAuthorithies(User user, Set<ServiceGrantedAuthority> authorities);
+    /**
      * Revoke all authorities of the user.
      * @param user The user
      */

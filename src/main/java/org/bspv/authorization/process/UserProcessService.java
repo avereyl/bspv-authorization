@@ -1,18 +1,18 @@
 package org.bspv.authorization.process;
 
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
+import org.bspv.authorization.business.ServiceGrantedAuthorityBusinessService;
 import org.bspv.authorization.business.UserBusinessService;
+import org.bspv.authorization.business.exception.UserNotFoundException;
 import org.bspv.authorization.model.User;
 import org.bspv.authorization.model.wrapper.UserSearchWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +25,9 @@ public class UserProcessService {
     
     @Autowired
     private UserBusinessService userBusinessService;
+    
+    @Autowired 
+    private ServiceGrantedAuthorityBusinessService authoritiesService;
 
     /**
      * Find all (active) users according given pagination request.
@@ -43,10 +46,10 @@ public class UserProcessService {
      * Users are loaded with their authorities but without their password.
      * @param userSearchWrapper
      *            Wrapper object containing search criterion
-     * @return A {@link Page} of users.
+     * @return A {@link Set} of users.
      */
     @PreAuthorize("isAdmin()")
-    public List<User> findUsers(UserSearchWrapper userSearchWrapper) {
+    public Set<User> findUsers(UserSearchWrapper userSearchWrapper) {
         return userBusinessService.findUsers(userSearchWrapper);
     }
 
@@ -74,32 +77,40 @@ public class UserProcessService {
      */
     @PreAuthorize("isAdmin() or isMyself(uuid)")
     public User findUser(UUID uuid) {
-        return userBusinessService.findUser(uuid);
+        return userBusinessService.findAnyUser(uuid);
     }
 
     /**
-     * This method save a user (fully or partially according principal rights).
+     * This method save a user.
      * @param user User to be saved
-     * @return
+     * @return The saved user.
      */
-    @PreAuthorize("isAdmin() or isMyself(user.id)")
-    public User saveUser(User user) {
-        // Even if the principal can access this method, it is not allowed to change anything on its account if not admin.
-        boolean iAmAdmin = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-                .getAuthorities()
-                .stream()
-                .anyMatch( a -> this.serviceName.equals(a.getService()) && "ADMIN".equals(a.getGrantedAuthority().getAuthority()));
-        boolean isNewUser = user.getVersion() == 0L;
-        User savedUser = null;
-        if (!iAmAdmin) {
-            if (isNewUser) {
-                throw new AccessDeniedException("You are not allowed to create a user.");
-            }
-            savedUser = userBusinessService.saveUserPartially(user);
-        } else {
-            savedUser = userBusinessService.saveUser(user);
+    @PreAuthorize("isAdmin()")
+    public User saveUser(final User user) {
+        //save user, password and authorities
+        User savedUser = userBusinessService.saveUser(user);
+        authoritiesService.replaceAuthorities(savedUser, user.getAuthorities());
+        try {
+            userBusinessService.saveUserPassword(user.getId(), user.getPassword());
+        } catch (UserNotFoundException e) {
+            // transaction is handled by process layer and so its very unlikely to reach this block !
         }
-        return savedUser;
+        return userBusinessService.findUser(user.getId());
+        
+    }
+
+    @PreAuthorize("isAdmin()")
+    public void saveUserUsername(UUID uuid, String username) throws UserNotFoundException {
+        userBusinessService.saveUsername(uuid, username);
+    }
+    @PreAuthorize("isAdmin() or isMyself(uuid)")
+    public void saveUserEmail(UUID uuid, String email) throws UserNotFoundException {
+        userBusinessService.saveUserEmail(uuid, email);
+        
+    }
+    @PreAuthorize("isAdmin() or isMyself(uuid)")
+    public void saveUserPassword(UUID uuid, String password) throws UserNotFoundException {
+        userBusinessService.saveUserPassword(uuid, password);
     }
 
 }

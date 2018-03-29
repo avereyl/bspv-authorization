@@ -29,12 +29,12 @@ public class TokenToUserMapper implements TokenToUserDetailsMapper<User> {
      * jsonwebtoken.Claims)
      */
     @Override
+    @SuppressWarnings("unchecked")
     public User toUserDetails(Claims claims) {
-        @SuppressWarnings("unchecked")
         List<Map<String, Object>> scopes = claims.get(AUTHORITIES_CLAIM_NAME, List.class);
         List<ServiceGrantedAuthority> authorities = scopes
                 .stream()
-                .flatMap(scope -> Arrays.asList(scope.get(ServiceAuthoritiesWrapper.AUTHORITIES_NAME))
+                .flatMap(scope -> ((List<String>)(scope.get(ServiceAuthoritiesWrapper.AUTHORITIES_NAME)))
                         .stream()
                         .map(auth -> new ServiceGrantedAuthority(scope.get(ServiceAuthoritiesWrapper.SERVICE_NAME).toString(), new SimpleGrantedAuthority(auth.toString())))
                         ).collect(Collectors.toList());
