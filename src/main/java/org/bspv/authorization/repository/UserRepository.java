@@ -131,4 +131,6 @@ public interface UserRepository {
      */
     Page<User> findAnyUsers(UserSearchWrapper searchWrapper, Pageable pageable);
 
+    void delete(UUID uuid);
+
 }

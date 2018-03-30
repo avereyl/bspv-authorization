@@ -40,8 +40,8 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
-    public static final UniqueKey<AuthoritiesRecord> SYS_PK_10124 = UniqueKeys0.SYS_PK_10124;
-    public static final UniqueKey<UsersRecord> SYS_PK_10109 = UniqueKeys0.SYS_PK_10109;
+    public static final UniqueKey<AuthoritiesRecord> SYS_PK_10147 = UniqueKeys0.SYS_PK_10147;
+    public static final UniqueKey<UsersRecord> SYS_PK_10136 = UniqueKeys0.SYS_PK_10136;
     public static final UniqueKey<UsersRecord> UK_USERS__1 = UniqueKeys0.UK_USERS__1;
     public static final UniqueKey<SchemaVersionRecord> SCHEMA_VERSION_PK = UniqueKeys0.SCHEMA_VERSION_PK;
 
@@ -56,13 +56,13 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     private static class UniqueKeys0 extends AbstractKeys {
-        public static final UniqueKey<AuthoritiesRecord> SYS_PK_10124 = createUniqueKey(Authorities.AUTHORITIES, "SYS_PK_10124", Authorities.AUTHORITIES.USER_ID, Authorities.AUTHORITIES.AUTHORITY, Authorities.AUTHORITIES.SERVICE);
-        public static final UniqueKey<UsersRecord> SYS_PK_10109 = createUniqueKey(Users.USERS, "SYS_PK_10109", Users.USERS.ID);
+        public static final UniqueKey<AuthoritiesRecord> SYS_PK_10147 = createUniqueKey(Authorities.AUTHORITIES, "SYS_PK_10147", Authorities.AUTHORITIES.USER_ID, Authorities.AUTHORITIES.AUTHORITY, Authorities.AUTHORITIES.SERVICE);
+        public static final UniqueKey<UsersRecord> SYS_PK_10136 = createUniqueKey(Users.USERS, "SYS_PK_10136", Users.USERS.ID);
         public static final UniqueKey<UsersRecord> UK_USERS__1 = createUniqueKey(Users.USERS, "UK_USERS__1", Users.USERS.USERNAME);
         public static final UniqueKey<SchemaVersionRecord> SCHEMA_VERSION_PK = createUniqueKey(SchemaVersion.SCHEMA_VERSION, "schema_version_pk", SchemaVersion.SCHEMA_VERSION.INSTALLED_RANK);
     }
 
     private static class ForeignKeys0 extends AbstractKeys {
-        public static final ForeignKey<AuthoritiesRecord, UsersRecord> FK_AUTHORITIES__USERS = createForeignKey(org.bspv.authorization.jooq.Keys.SYS_PK_10109, Authorities.AUTHORITIES, "FK_AUTHORITIES__USERS", Authorities.AUTHORITIES.USER_ID);
+        public static final ForeignKey<AuthoritiesRecord, UsersRecord> FK_AUTHORITIES__USERS = createForeignKey(org.bspv.authorization.jooq.Keys.SYS_PK_10136, Authorities.AUTHORITIES, "FK_AUTHORITIES__USERS", Authorities.AUTHORITIES.USER_ID);
     }
 }

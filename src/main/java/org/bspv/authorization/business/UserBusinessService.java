@@ -4,11 +4,13 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.bspv.authorization.business.exception.UserNotFoundException;
+import org.bspv.authorization.business.exception.UsernameAlreadyExistingException;
 import org.bspv.authorization.model.User;
 import org.bspv.authorization.model.wrapper.UserSearchWrapper;
 import org.bspv.authorization.repository.UserDetailsRepository;
 import org.bspv.authorization.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -88,8 +90,18 @@ public class UserBusinessService {
         return userRepository.findAnyUsers(userSearchWrapper, pageable);
     }
 
-    public User saveUser(User user) {
-        return (user.getVersion() == 0L) ? userRepository.insert(user) : userRepository.update(user);
+    /**
+     * 
+     * @param user
+     * @return
+     * @throws UsernameAlreadyExistingException
+     */
+    public User saveUser(User user) throws UsernameAlreadyExistingException {
+        try {
+            return (user.getVersion() == 0L) ? userRepository.insert(user) : userRepository.update(user);
+        } catch (DuplicateKeyException e) {
+            throw new UsernameAlreadyExistingException("Username " + user.getUsername() + " is already existing.");
+        }
     }
 
     public void saveUsername(UUID uuid, String username) throws UserNotFoundException {
@@ -105,6 +117,10 @@ public class UserBusinessService {
     public void saveUserPassword(UUID uuid, String password) throws UserNotFoundException {
         User user = this.loadUser(uuid);
         userDetailsRepository.changePassword(user.getUsername(), password);
+    }
+
+    public void deleteUser(UUID uuid) {
+        userRepository.delete(uuid);
     }
     
 }

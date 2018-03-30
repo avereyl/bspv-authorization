@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.bspv.authorization.business.ServiceGrantedAuthorityBusinessService;
 import org.bspv.authorization.business.UserBusinessService;
 import org.bspv.authorization.business.exception.UserNotFoundException;
+import org.bspv.authorization.business.exception.UsernameAlreadyExistingException;
 import org.bspv.authorization.model.User;
 import org.bspv.authorization.model.wrapper.UserSearchWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,9 +85,10 @@ public class UserProcessService {
      * This method save a user.
      * @param user User to be saved
      * @return The saved user.
+     * @throws UsernameAlreadyExistingException 
      */
     @PreAuthorize("isAdmin()")
-    public User saveUser(final User user) {
+    public User saveUser(final User user) throws UsernameAlreadyExistingException {
         //save user, password and authorities
         User savedUser = userBusinessService.saveUser(user);
         authoritiesService.replaceAuthorities(savedUser, user.getAuthorities());
@@ -111,6 +113,15 @@ public class UserProcessService {
     @PreAuthorize("isAdmin() or isMyself(uuid)")
     public void saveUserPassword(UUID uuid, String password) throws UserNotFoundException {
         userBusinessService.saveUserPassword(uuid, password);
+    }
+
+    @PreAuthorize("isAdmin()")
+    public void deleteUser(UUID uuid) {
+        User user = userBusinessService.findAnyUser(uuid);
+        if (user != null) {
+            authoritiesService.revokeAllAuthorities(user);
+            userBusinessService.deleteUser(uuid);
+        }
     }
 
 }

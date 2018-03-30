@@ -8,6 +8,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.bspv.authorization.business.exception.UserNotFoundException;
+import org.bspv.authorization.business.exception.UsernameAlreadyExistingException;
 import org.bspv.authorization.model.ServiceGrantedAuthority;
 import org.bspv.authorization.model.User;
 import org.bspv.authorization.model.wrapper.UserSearchWrapper;
@@ -15,6 +16,7 @@ import org.bspv.authorization.process.AuthoritiesProcessService;
 import org.bspv.authorization.process.UserProcessService;
 import org.bspv.authorization.rest.beans.ServiceGrantedAuthorityBean;
 import org.bspv.authorization.rest.beans.UserBean;
+import org.bspv.commons.rest.controller.exception.BadRequestException;
 import org.bspv.commons.rest.controller.exception.NotFoundException;
 import org.bspv.commons.rest.controller.support.PaginationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,13 +37,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController("/")
-@RequestMapping(produces = "application/json")
 public class UserController {
 
     @Autowired
@@ -208,11 +208,12 @@ public class UserController {
      *            The user to save.
      * @param principal
      *            The principal responsible for the request.
+     * @throws BadRequestException 
      */
-    @PostMapping("users/")
+    @PostMapping(value="users/")
     public ResponseEntity<User> createUser(
             @RequestBody @Validated({ UserBean.CreationValidation.class }) UserBean userBean,
-            @AuthenticationPrincipal User principal) {
+            @AuthenticationPrincipal User principal) throws BadRequestException {
 //      @formatter:off
         Set<ServiceGrantedAuthorityBean> authoritiesBeans = userBean.getAuthorithies() == null ? Collections.emptySet() : userBean.getAuthorithies();
         Set<ServiceGrantedAuthority> authorities = authoritiesBeans
@@ -235,7 +236,12 @@ public class UserController {
                 .build();
 //      @formatter:on
         // save the user with password and authorities
-        User savedUser = userProcessService.saveUser(user);
+        User savedUser;
+        try {
+            savedUser = userProcessService.saveUser(user);
+        } catch (UsernameAlreadyExistingException e) {
+            throw new BadRequestException(e);
+        }
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(user.getId())
                 .toUri();
         return ResponseEntity.created(location).eTag("\"" + savedUser.getVersion() + "\"").build();
@@ -251,12 +257,13 @@ public class UserController {
      * @param userBean
      * @param principal
      *            The principal responsible for the request.
+     * @throws BadRequestException 
      */
     @PutMapping("users/{uuid}")
     public ResponseEntity<User> fullySaveUser(@PathVariable(value = "uuid") UUID uuid,
             @RequestHeader HttpHeaders headers,
             @RequestBody @Validated({ UserBean.UpdateValidation.class }) UserBean userBean,
-            @AuthenticationPrincipal User principal) {
+            @AuthenticationPrincipal User principal) throws BadRequestException {
 
         Long version = headers.getIfMatch().isEmpty() ? 0L : Long.valueOf(headers.getIfMatch().get(0));
 
@@ -283,10 +290,14 @@ public class UserController {
                 .build();
 //      @formatter:on
         // save the user with password and authorities
-        User savedUser = userProcessService.saveUser(user);
-        if (version == 0) {
-            URI location = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
-            return ResponseEntity.created(location).eTag("\"" + savedUser.getVersion() + "\"").build();
+        try {
+            User savedUser = userProcessService.saveUser(user);
+            if (version == 0) {
+                URI location = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
+                return ResponseEntity.created(location).eTag("\"" + savedUser.getVersion() + "\"").build();
+            }
+        } catch (UsernameAlreadyExistingException e) {
+            throw new BadRequestException(e);
         }
         return ResponseEntity.ok().build();
     }
@@ -349,6 +360,19 @@ public class UserController {
         } catch (UserNotFoundException e) {
             throw new NotFoundException(e);
         }
+    }
+    
+    /**
+     * Return the user with the given uuid.
+     * 
+     * @param uuid
+     *            id of the targeted user
+     * @return The user
+     */
+    @DeleteMapping("users/{uuid}")
+    public ResponseEntity<User> deleteUser(@PathVariable("uuid") UUID uuid) {
+        userProcessService.deleteUser(uuid);
+        return ResponseEntity.noContent().build();
     }
 
 }

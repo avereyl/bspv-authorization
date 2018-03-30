@@ -36,6 +36,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 /**
  *
  */
@@ -74,7 +75,7 @@ public class UserJooqRepository implements UserRepository {
                     USERS.EMAIL,
                     USERS.ENABLED)
             .values(user.getId(),
-                    0L,
+                    1L,
                     user.getUsername(),
                     user.getPassword(),
                     user.getEmail(),
@@ -100,7 +101,7 @@ public class UserJooqRepository implements UserRepository {
                     USERS.EMAIL,
                     USERS.ENABLED)
             .values(user.getId(),
-                    0L,
+                    1L,
                     user.getUsername(),
                     user.getPassword(),
                     user.getEmail(),
@@ -144,6 +145,19 @@ public class UserJooqRepository implements UserRepository {
             return RecordConverterFactory.convert(results.get(0));
         }
     }
+
+    /* (non-Javadoc)
+     * @see org.bspv.authorization.repository.UserRepository#delete(java.util.UUID)
+     */
+    @Override
+    public void delete(UUID uuid) {
+        this.dslContext
+        .delete(USERS)
+        .where(USERS.ID.eq(uuid))
+        .execute();
+    }
+
+
 
     /* (non-Javadoc)
      * @see org.bspv.authorization.repository.UserRepository#findAllUsers(org.springframework.data.domain.Pageable)
@@ -363,13 +377,14 @@ public class UserJooqRepository implements UserRepository {
 
     public static Set<ServiceGrantedAuthority> buildAuthorithies(Result<? extends Record> result) {
         return result.stream()
-        .map(r -> {
-            return ServiceGrantedAuthority.builder()
-                    .grantedAuthority(new SimpleGrantedAuthority(r.get(AUTHORITIES.AUTHORITY)))
-                    .service(r.get(AUTHORITIES.SERVICE))
-                    .build();
-        })
-        .collect(Collectors.toSet());
+                .filter(r -> !StringUtils.isEmpty(r.get(AUTHORITIES.SERVICE)) && !StringUtils.isEmpty(r.get(AUTHORITIES.AUTHORITY)))
+                .map(r -> {
+                    return ServiceGrantedAuthority.builder()
+                            .grantedAuthority(new SimpleGrantedAuthority(r.get(AUTHORITIES.AUTHORITY)))
+                            .service(r.get(AUTHORITIES.SERVICE))
+                            .build();
+                })
+                .collect(Collectors.toSet());
     }
     
     private Condition buildCondition(UserSearchWrapper searchWrapper) {
