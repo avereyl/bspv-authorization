@@ -65,7 +65,7 @@ public class UserControllerAsAdminIntegrationTest extends AbstractControllerInte
     }
     
     @Test(priority=20)
-    public void givenUsersURI_whenPost_thenVerifyResponseCreated() throws Exception {
+    public void givenUsersURI_whenPostGetDelete_thenVerifyResponseAreCreatedOkNoContent() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, String> newUserMap = new HashMap<>();
         newUserMap.put("username", "user");
