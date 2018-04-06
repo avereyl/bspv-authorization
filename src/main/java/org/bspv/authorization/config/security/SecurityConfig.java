@@ -1,8 +1,9 @@
 package org.bspv.authorization.config.security;
 
-import org.bspv.authorization.model.ServiceGrantedAuthority;
-import org.bspv.authorization.model.User;
 import org.bspv.security.jwt.mapper.TokenToUserDetailsMapper;
+import org.bspv.security.jwt.mapper.TokenToUserMapper;
+import org.bspv.security.model.ServiceGrantedAuthority;
+import org.bspv.security.model.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -2,7 +2,7 @@ package org.bspv.authorization.config.security;
 
 import java.util.UUID;
 
-import org.bspv.authorization.model.User;
+import org.bspv.security.model.User;
 import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.core.Authentication;

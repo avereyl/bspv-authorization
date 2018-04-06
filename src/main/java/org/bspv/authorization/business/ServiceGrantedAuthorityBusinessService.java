@@ -3,9 +3,9 @@ package org.bspv.authorization.business;
 import java.util.Collections;
 import java.util.Set;
 
-import org.bspv.authorization.model.ServiceGrantedAuthority;
-import org.bspv.authorization.model.User;
 import org.bspv.authorization.repository.ServiceGrantedAuthorityRepository;
+import org.bspv.security.model.ServiceGrantedAuthority;
+import org.bspv.security.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

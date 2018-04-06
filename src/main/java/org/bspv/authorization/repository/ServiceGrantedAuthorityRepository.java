@@ -5,8 +5,8 @@ package org.bspv.authorization.repository;
 
 import java.util.Set;
 
-import org.bspv.authorization.model.ServiceGrantedAuthority;
-import org.bspv.authorization.model.User;
+import org.bspv.security.model.ServiceGrantedAuthority;
+import org.bspv.security.model.User;
 
 /**
  *

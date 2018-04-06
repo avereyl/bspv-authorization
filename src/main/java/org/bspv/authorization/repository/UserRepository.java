@@ -6,8 +6,8 @@ package org.bspv.authorization.repository;
 import java.util.Set;
 import java.util.UUID;
 
-import org.bspv.authorization.model.User;
 import org.bspv.authorization.model.wrapper.UserSearchWrapper;
+import org.bspv.security.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -131,6 +131,10 @@ public interface UserRepository {
      */
     Page<User> findAnyUsers(UserSearchWrapper searchWrapper, Pageable pageable);
 
+    /**
+     * Delete user using its id.
+     * @param uuid id of the user to delete
+     */
     void delete(UUID uuid);
 
 }

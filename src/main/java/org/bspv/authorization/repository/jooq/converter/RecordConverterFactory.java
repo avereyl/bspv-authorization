@@ -3,11 +3,11 @@
  */
 package org.bspv.authorization.repository.jooq.converter;
 
-import org.bspv.authorization.model.ServiceGrantedAuthority;
-import org.bspv.authorization.model.User;
-import org.bspv.authorization.jooq.tables.records.UsersRecord;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.bspv.authorization.jooq.tables.records.AuthoritiesRecord;
+import org.bspv.authorization.jooq.tables.records.UsersRecord;
+import org.bspv.security.model.ServiceGrantedAuthority;
+import org.bspv.security.model.User;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 /**
  *
  */

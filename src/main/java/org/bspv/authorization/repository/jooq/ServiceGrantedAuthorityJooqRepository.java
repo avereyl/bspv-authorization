@@ -7,10 +7,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.bspv.authorization.jooq.tables.records.AuthoritiesRecord;
-import org.bspv.authorization.model.ServiceGrantedAuthority;
-import org.bspv.authorization.model.User;
 import org.bspv.authorization.repository.ServiceGrantedAuthorityRepository;
 import org.bspv.authorization.repository.jooq.converter.RecordConverterFactory;
+import org.bspv.security.model.ServiceGrantedAuthority;
+import org.bspv.security.model.User;
 import org.jooq.DSLContext;
 import org.jooq.InsertValuesStep3;
 import org.springframework.stereotype.Repository;

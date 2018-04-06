@@ -7,9 +7,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.bspv.authorization.jooq.tables.records.UsersRecord;
-import org.bspv.authorization.model.User;
 import org.bspv.authorization.repository.UserDetailsRepository;
 import org.bspv.authorization.repository.jooq.converter.RecordConverterFactory;
+import org.bspv.security.model.User;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;

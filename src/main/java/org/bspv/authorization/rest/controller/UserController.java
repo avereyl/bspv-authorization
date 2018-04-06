@@ -9,8 +9,6 @@ import java.util.stream.Collectors;
 
 import org.bspv.authorization.business.exception.UserNotFoundException;
 import org.bspv.authorization.business.exception.UsernameAlreadyExistingException;
-import org.bspv.authorization.model.ServiceGrantedAuthority;
-import org.bspv.authorization.model.User;
 import org.bspv.authorization.model.wrapper.UserSearchWrapper;
 import org.bspv.authorization.process.AuthoritiesProcessService;
 import org.bspv.authorization.process.UserProcessService;
@@ -19,6 +17,8 @@ import org.bspv.authorization.rest.beans.UserBean;
 import org.bspv.commons.rest.controller.exception.BadRequestException;
 import org.bspv.commons.rest.controller.exception.NotFoundException;
 import org.bspv.commons.rest.controller.support.PaginationHelper;
+import org.bspv.security.model.ServiceGrantedAuthority;
+import org.bspv.security.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

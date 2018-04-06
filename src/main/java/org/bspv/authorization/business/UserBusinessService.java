@@ -5,10 +5,10 @@ import java.util.UUID;
 
 import org.bspv.authorization.business.exception.UserNotFoundException;
 import org.bspv.authorization.business.exception.UsernameAlreadyExistingException;
-import org.bspv.authorization.model.User;
 import org.bspv.authorization.model.wrapper.UserSearchWrapper;
 import org.bspv.authorization.repository.UserDetailsRepository;
 import org.bspv.authorization.repository.UserRepository;
+import org.bspv.security.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;

@@ -3,7 +3,7 @@
  */
 package org.bspv.authorization.repository;
 
-import org.bspv.authorization.model.User;
+import org.bspv.security.model.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 /**
