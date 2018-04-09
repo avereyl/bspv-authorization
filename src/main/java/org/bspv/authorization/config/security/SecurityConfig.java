@@ -1,5 +1,6 @@
 package org.bspv.authorization.config.security;
 
+import org.bspv.security.expressionhandler.CustomMethodSecurityExpressionHandler;
 import org.bspv.security.jwt.mapper.TokenToUserDetailsMapper;
 import org.bspv.security.jwt.mapper.TokenToUserMapper;
 import org.bspv.security.model.ServiceGrantedAuthority;
